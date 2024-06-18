@@ -6,9 +6,9 @@ import json
 
 
 msal_app = msal.ConfidentialClientApplication(
-    app_config["client_id"],
-    authority=app_config.get("authority"),  # For Entra ID or External ID,
-    client_credential=app_config["secret"],
+    app_config.config.get("client_id"),
+    authority=app_config.config.get("authority"),  # For Entra ID or External ID,
+    client_credential=app_config.config.get("secret"),
     # token_cache=...  # Default cache is in memory only.
                        # You can learn how to use SerializableTokenCache from
                        # https://msal-python.rtfd.io/en/latest/#msal.SerializableTokenCache
@@ -34,9 +34,9 @@ def index():
 @app.route('/login')
 def login():
     auth_url = msal_app.get_authorization_request_url(
-        app_config["scope"],
+        app_config.config.get("scope"),
         state=str(uuid.uuid4()),
-        redirect_uri=app_config["REDIRECT_URI"],
+        redirect_uri=app_config.config.get("REDIRECT_URI"),
         prompt='login')
     print(auth_url)
     print(session)
@@ -55,8 +55,8 @@ def callback():
     if code:
         result = msal_app.acquire_token_by_authorization_code(
             code,
-            scopes=app_config["scope"],
-            redirect_uri=app_config["REDIRECT_URI"])
+            scopes=app_config.config.get("scope"),
+            redirect_uri=app_config.config.get("REDIRECT_URI"))
         if 'access_token' in result:
             session['access_token'] = result['access_token']
             session['user'] = msal_app.get_accounts()[0] 
