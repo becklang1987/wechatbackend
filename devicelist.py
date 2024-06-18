@@ -56,4 +56,5 @@ def get_devices():
 
 # Run the Flask application on host 0.0.0.0, port 5003 in debug mode
 if __name__ == '__main__':
+    
     devicelist.run(debug=True, host='0.0.0.0', port=5003)
