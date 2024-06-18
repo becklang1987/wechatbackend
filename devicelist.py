@@ -1,11 +1,12 @@
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,session
 
 # Path to the CSV file containing the device information
 file_path = '/Users/honglang/wechat_backend/host_info.csv'
 
 # Create a new Flask web application instance
 devicelist = Flask(__name__)
+devicelist.secret_key = 'your_session_secret_key'
 
 def get_devices_by_location(file_path, location):
     """
@@ -18,7 +19,7 @@ def get_devices_by_location(file_path, location):
     Returns:
     list: A list of dictionaries where each dictionary represents a device.
     """
-    # Read the CSV file into a DataFrame
+  
     df = pd.read_csv(file_path)
     
     # Filter the DataFrame for devices at the specified location
@@ -28,6 +29,7 @@ def get_devices_by_location(file_path, location):
     location_data = location_df.to_dict(orient='records')
     
     return location_data
+
 
 # Print the devices from a specific location for debugging purposes
 print(get_devices_by_location(file_path, 'ChengduTreat'))
@@ -41,20 +43,23 @@ def get_devices():
     Returns:
     JSON response containing the devices or an error message.
     """
+    if 'sid' in session and 'token' in session:
     # Get the 'location' query parameter from the request
-    location = request.args.get('location')
+        location = request.args.get('location')
     
     # If 'location' is not provided, return an error response
-    if not location:
-        return jsonify({'error': 'Location is required.'}), 400
+        if not location:
+            return jsonify({'error': 'Location is required.'}), 400
     
     # Retrieve devices by location from the CSV file
-    devices = get_devices_by_location(file_path, location)
+        devices = get_devices_by_location(file_path, location)
     
     # Return the devices as a JSON response
-    return jsonify({'devices': devices})
+        return jsonify({'devices': devices})
+    else:
+        return jsonify({'error': 'Please login first.'}), 401
 
 # Run the Flask application on host 0.0.0.0, port 5003 in debug mode
 if __name__ == '__main__':
-    
+
     devicelist.run(debug=True, host='0.0.0.0', port=5003)
