@@ -128,20 +128,34 @@ def validation():
     else:
         print("user or sid not exist")
         return jsonify({'message': 'user not exist or sid error'}), 401
-@app.route('/get_user',methods=['GET'])
+@app.route('/get_user',methods=['GET','POST','PATCH'])
 def get_user():
-
     if 'token' not in session:
         return jsonify({'message': 'user not authenticated'}), 401
     else:
         headers = {"Authorization": f"Bearer {session['token']}"}
-        response = requests.get("https://graph.microsoft.com/v1.0/me", headers=headers)
-        if response.status_code == 200:
-            user_info = response.json()
-            print("User info:", user_info)
-            return jsonify(user_info), 200
-        else:
-            return jsonify({'message': 'Failed to get user info'}), 401
+        if request.method == 'POST':
+            data = request.get_json()
+            print(data)
+        if request.method == 'PATCH':
+            data = request.get_json()
+            print(data)
+        if request.method == 'GET':
+            print("get user info")
+            response = requests.get("https://graph.microsoft.com/v1.0/me", headers=headers)
+            if response.status_code == 200:
+                user_info = response.json()
+                property_list = list(user_info.keys())  # 使用 list(item.keys())[0] 获取每个字典的唯一键
+                values_list = list(user_info.values()) 
+                session['token']=token
+                print("User info:", user_info)
+                print("Property list:", property_list)
+                print("Values list:", values_list)
+                dict_list = [{k: v} for k, v in user_info.items()]
+                print(dict_list)
+                return jsonify({'plist':property_list,'vlist':values_list}), 200
+            else:
+                return jsonify({'message': 'Failed to get user info'}), 401
 
         #graph_client = GraphServiceClient(credentials=Credentials,scopes=app_config.config.get("scope"))
         #async def get_user_info():
