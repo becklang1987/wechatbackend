@@ -141,19 +141,22 @@ def get_user():
             data = request.get_json()
             print(data)
         if request.method == 'GET':
-            print("get user info")
-            response = requests.get("https://graph.microsoft.com/v1.0/me", headers=headers)
+            displayName = request.args.get('displayName')
+            response = requests.get(f"https://graph.microsoft.com/v1.0/users?$filter=displayName eq '{displayName}'&$select=id,displayName,department,JobTitle,mail,officeLocation,userPrincipalName", headers=headers)
+            print(response)
+            #response = requests.get("https://graph.microsoft.com/v1.0/users?$select=id,displayName,department,JobTitle,mail,officeLocation,userPrincipalName", headers=headers)
             if response.status_code == 200:
-                user_info = response.json()
-                property_list = list(user_info.keys())  # 使用 list(item.keys())[0] 获取每个字典的唯一键
-                values_list = list(user_info.values()) 
-                session['token']=token
+                user_info = response.json().get('value')
                 print("User info:", user_info)
-                print("Property list:", property_list)
-                print("Values list:", values_list)
-                dict_list = [{k: v} for k, v in user_info.items()]
-                print(dict_list)
-                return jsonify({'plist':property_list,'vlist':values_list}), 200
+                #property_list = list(user_info.keys())[1:] # 使用 list(item.keys())[0] 获取每个字典的唯一键
+                #values_list = list(user_info.values())[1:]
+                session['token']=token
+                #print("User info:", user_info)
+                #print("Property list:", property_list)
+                #print("Values list:", values_list)
+                #dict_list = [{k: v} for k, v in user_info.items()]
+                #print(dict_list)
+                return jsonify({'list': user_info}), 200
             else:
                 return jsonify({'message': 'Failed to get user info'}), 401
 
