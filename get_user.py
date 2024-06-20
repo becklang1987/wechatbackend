@@ -9,7 +9,7 @@ app=Flask(__name__)
 
 
 @app.route('/',methods=['GET','POST','PATCH'])
-def get_user():
+def get_user(id,):
     if request.method == 'GET':
         print(request.method)
         print(request.args)

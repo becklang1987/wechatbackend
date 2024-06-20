@@ -131,7 +131,61 @@ def validation():
 @app.route('/get_user',methods=['GET','POST','PATCH'])
 def get_user():
     if 'token' not in session:
-        return jsonify({'message': 'user not authenticated'}), 401
+        return jsonify({'message': 'user not authenticated'}), 405
+    else:
+        headers = {"Authorization": f"Bearer {session['token']}","Content-type":"application/json"}
+        if request.method == 'POST':
+            recived_data = request.get_json()
+            #recived_data.get('passwordProfile')['forceChangePasswordNextSignIn']=str(recived_data.get('passwordProfile')['forceChangePasswordNextSignIn']).lower()
+            #recived_data['accountEnabled']=str(recived_data['accountEnabled']).lower()
+            create_user_url = f"https://graph.microsoft.com/v1.0/users"
+            create_user_response = requests.post(create_user_url, headers=headers,data=json.dumps(recived_data))
+            data=json.dumps(recived_data)
+            print(data)
+            print(recived_data)
+            if create_user_response.status_code == 201 :
+                return jsonify({'message': 'User Created'}), 200
+            else:
+                return jsonify({'message': 'Failed'}), 401
+        if request.method == 'PATCH':
+            data = request.get_json()
+            print(data)
+        if request.method == 'GET':
+            print("get user info")
+            displayName = request.args.get('displayName')
+            print(displayName)
+            basic_info_url = f"https://graph.microsoft.com/v1.0/users?" \
+            f"$filter=displayName eq '{displayName}'&" \
+            f"$select=id,displayName,department,JobTitle,mail,"\
+            f"officeLocation,userPrincipalName,mobilePhone,businessPhones"
+            baisc_info_response = requests.get(basic_info_url, headers=headers)
+            #response = requests.get(f"https://graph.microsoft.com/v1.0/users?$filter=displayName eq '{displayName}'&$select=*", headers=headers) 
+            print(baisc_info_response)
+            #response = requests.get("https://graph.microsoft.com/v1.0/users?$select=id,displayName,department,JobTitle,mail,officeLocation,userPrincipalName", headers=headers)
+            if baisc_info_response.status_code == 200 :
+                user_info = baisc_info_response.json().get('value')
+                id = user_info[0].get('id')
+                manager_info_url = f"https://graph.microsoft.com/v1.0/users/{id}/manager?$select=displayName"
+                manager_info_response = requests.get(manager_info_url, headers=headers)
+                manager_info=manager_info_response.json().get('displayName')
+                #property_list = list(user_info.keys())[1:] # 使用 list(item.keys())[0] 获取每个字典的唯一键
+                #values_list = list(user_info.values())[1:]
+                session['token']=token
+                m_dict={'manager':manager_info}
+                user_info[0].update(m_dict)
+                print(user_info)
+                #print("User info:", user_info)
+                #print("Property list:", property_list)
+                #print("Values list:", values_list)
+                #dict_list = [{k: v} for k, v in user_info.items()]
+                #print(dict_list)
+                return jsonify({'list': user_info}), 200
+            else:
+                return jsonify({'message': 'Failed to get user info'}), 401
+@app.route('/get_user_details',methods=['GET','POST','PATCH'])
+def get_user_details():
+    if 'token' not in session:
+        return jsonify({'message': 'user not authenticated'}), 405
     else:
         headers = {"Authorization": f"Bearer {session['token']}"}
         if request.method == 'POST':
@@ -141,29 +195,78 @@ def get_user():
             data = request.get_json()
             print(data)
         if request.method == 'GET':
-            displayName = request.args.get('displayName')
-            response = requests.get(f"https://graph.microsoft.com/v1.0/users?$filter=displayName eq '{displayName}'&$select=id,displayName,department,JobTitle,mail,officeLocation,userPrincipalName", headers=headers)
-            print(response)
+            print("get user info")
+            id = request.args.get('id')
+            print(id)
+            print(request)
+            group_info_url = f"https://graph.microsoft.com/v1.0/users/{id}/memberOf?$select=displayName,id,description"
+            group_info_response = requests.get(group_info_url, headers=headers)
+            #response = requests.get(f"https://graph.microsoft.com/v1.0/users?$filter=displayName eq '{displayName}'&$select=*", headers=headers) 
             #response = requests.get("https://graph.microsoft.com/v1.0/users?$select=id,displayName,department,JobTitle,mail,officeLocation,userPrincipalName", headers=headers)
-            if response.status_code == 200:
-                user_info = response.json().get('value')
-                print("User info:", user_info)
-                #property_list = list(user_info.keys())[1:] # 使用 list(item.keys())[0] 获取每个字典的唯一键
-                #values_list = list(user_info.values())[1:]
+            if group_info_response.status_code == 200 :
+                group_info=group_info_response.json().get('value')
+                print("Group info:", group_info)
                 session['token']=token
                 #print("User info:", user_info)
                 #print("Property list:", property_list)
                 #print("Values list:", values_list)
                 #dict_list = [{k: v} for k, v in user_info.items()]
                 #print(dict_list)
-                return jsonify({'list': user_info}), 200
+                return jsonify({'group_list': group_info}), 200
             else:
                 return jsonify({'message': 'Failed to get user info'}), 401
-
-        #graph_client = GraphServiceClient(credentials=Credentials,scopes=app_config.config.get("scope"))
-        #async def get_user_info():
-            #user_info = await graph_client.me.get()
-        #return asyncio.run(get_user_info())
+@app.route('/search_group',methods=['GET','POST','PATCH'])
+def search_group():
+    if 'token' not in session:
+        return jsonify({'message': 'user not authenticated'}), 405
+    else:
+        headers = {"Authorization": f"Bearer {session['token']}","ConsistencyLevel":"eventual"}
+        if request.method == 'GET':
+            print("get user info")
+            groupDisplayName = request.args.get('displayName')
+            print(groupDisplayName)
+            group_info_url = f'https://graph.microsoft.com/v1.0/groups?$search="displayName:{groupDisplayName}"&$select=displayName,id,description'
+            group_info_response = requests.get(group_info_url, headers=headers)
+            if group_info_response.status_code == 200 :
+                group_info=group_info_response.json().get('value')
+                print("Group info:", group_info)
+                session['token']=token
+                return jsonify({'group_list': group_info}), 200
+            else:
+                return jsonify({'message': 'Failed to search group'}), 401
+@app.route('/add_user_to_group',methods=['GET','POST','PATCH','DELETE'])
+def add_user_to_group():
+    if 'token' not in session:
+        return jsonify({'message': 'user not authenticated'}), 405
+    else:
+        headers = {"Authorization": f"Bearer {session['token']}","Content-Type":"application/json"}
+        if request.method == 'POST':
+            recieved_data = request.get_json()
+            groupId=recieved_data.get('groupId')
+            userId=recieved_data.get('userId')
+            print(groupId,userId)
+            add_user_to_group_url = f'https://graph.microsoft.com/v1.0/groups/{groupId}/members/$ref'
+            json_data = {
+                "@odata.id": f"https://graph.microsoft.com/v1.0/directoryObjects/{userId}"
+            }
+            add_user_response = requests.post(add_user_to_group_url, headers=headers,data=json.dumps(json_data))
+            print(add_user_response)
+            if add_user_response.status_code == 204 :
+                return jsonify({'message': 'User Added'}), 200
+            else:
+                return jsonify({'message': 'Failed'}), 401
+        if request.method == 'DELETE':
+            recieved_data = request.get_json()
+            groupId=recieved_data.get('groupId')
+            userId=recieved_data.get('userId')
+            print(groupId, userId)
+            delete_user_from_group_url = f'https://graph.microsoft.com/v1.0/groups/{groupId}/members/{userId}/$ref'
+            delete_user_response = requests.delete(delete_user_from_group_url, headers=headers)
+            print(delete_user_response)
+            if delete_user_response.status_code == 204 :
+                return jsonify({'message': 'User Removed'}), 200
+            else:
+                return jsonify({'message': 'Failed'}), 401
 '''
 @app.route('/profile')
 def profile():
