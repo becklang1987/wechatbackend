@@ -1,8 +1,8 @@
 version: 0.2
 env:
   variables:
-  USER_NAME: "yinzhaji23@gmail.com"
-  PASSWORD: "E23kis!4E23kis!4"
+    USER_NAME: "yinzhaji23@gmail.com"
+    PASSWORD: "E23kis!4E23kis!4"
 phases:
   docker_login:
     commands:
