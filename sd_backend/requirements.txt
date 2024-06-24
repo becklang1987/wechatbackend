@@ -1,0 +1,8 @@
+flask
+gunicorn
+uuid
+msal
+requests
+random
+string
+json
