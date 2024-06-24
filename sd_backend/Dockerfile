@@ -4,7 +4,7 @@ RUN mkdir /app
 COPY . /app
 RUN apt-get update && apt-get install -y python3 python3-pip vim curl iputils-ping
 RUN apt-get update
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r /app/requirements.txt
 
 WORKDIR /app
 EXPOSE 5020
