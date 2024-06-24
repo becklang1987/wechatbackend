@@ -13,7 +13,7 @@ phases:
       - echo Building wechat_backend:v1.1
       - cd sd_backend
       - docker build -t wechat_backend:v1.1 .
-      - docker tag wechat_backend:v1.0 becklang1987/wechat_backend:v1.1
+      - docker tag wechat_backend:v1.1 becklang1987/wechat_backend:v1.1
   post_build:
     commands:
       - echo Pushing wechat_backend:v1.0 to Docker Hub
