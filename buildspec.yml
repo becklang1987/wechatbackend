@@ -4,17 +4,17 @@ env:
     USER_NAME: "yinzhaji23@gmail.com"
     PASSWORD: "E23kis!4E23kis!4"
 phases:
-  docker_login:
+  pre_build:
     commands:
       - echo Build started on `date`
       - docker login -u $USER_NAME -p $PASSWORD
-  imges_build:
+  build:
     commands:
       - echo Building wechat_backend:v1.0
       - cd sd_backend
       - docker build -t wechat_backend:v1.0
       - docker tag wechat_backend:v1.0 becklang1987/wechat_backend:v1.0
-  push_images:
+  post_build:
     commands:
       - echo Pushing wechat_backend:v1.0 to Docker Hub
       - docker push becklang1987/wechat_backend:v1.0
