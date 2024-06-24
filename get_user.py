@@ -3,7 +3,7 @@ import msal ,asyncio,requests
 from msgraph import GraphServiceClient
 
 from azure.identity import ClientSecretCredential
-import uuid,app_config
+import uuid,sd_backend.app_config as app_config
 import json
 app=Flask(__name__)
 
