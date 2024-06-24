@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:latest
+FROM ubuntu:latest
 
 RUN mkdir /app
 COPY . /app

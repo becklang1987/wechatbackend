@@ -10,11 +10,11 @@ phases:
       - docker login -u $USER_NAME -p $PASSWORD
   build:
     commands:
-      - echo Building wechat_backend:v1.0
+      - echo Building wechat_backend:v1.1
       - cd sd_backend
-      - docker build -t wechat_backend:v1.0 .
-      - docker tag wechat_backend:v1.0 becklang1987/wechat_backend:v1.0
+      - docker build -t wechat_backend:v1.1 .
+      - docker tag wechat_backend:v1.0 becklang1987/wechat_backend:v1.1
   post_build:
     commands:
       - echo Pushing wechat_backend:v1.0 to Docker Hub
-      - docker push becklang1987/wechat_backend:v1.0
+      - docker push becklang1987/wechat_backend:v1.1
