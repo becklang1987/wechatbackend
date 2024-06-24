@@ -12,7 +12,7 @@ phases:
     commands:
       - echo Building wechat_backend:v1.0
       - cd sd_backend
-      - docker build -t wechat_backend:v1.0
+      - docker build -t wechat_backend:v1.0 .
       - docker tag wechat_backend:v1.0 becklang1987/wechat_backend:v1.0
   post_build:
     commands:
