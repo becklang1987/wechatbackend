@@ -1,6 +1,6 @@
 from flask import Flask,request, session,jsonify,render_template_string
 from password_generator import generate_random_password
-import msal ,requests
+import msal ,requests,os
 import uuid, app_config as app_config
 import json
 
@@ -8,7 +8,7 @@ import json
 msal_app = msal.ConfidentialClientApplication(
     app_config.config.get("client_id"),
     authority=app_config.config.get("authority"),  # For Entra ID or External ID,
-    client_credential=app_config.config.get("secret"),
+    client_credential=os.getenv("azure_secret"),
     # token_cache=...  # Default cache is in memory only.
                        # You can learn how to use SerializableTokenCache from
                        # https://msal-python.rtfd.io/en/latest/#msal.SerializableTokenCache
