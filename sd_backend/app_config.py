@@ -1,5 +1,5 @@
 config = {
-  "note": "You configure either the authority setting when you are using Entra ID or External ID, or the oidc_authority setting when you are using External ID with its custom domain. Change the other one to null",
+  "note": "Yo configure either the authority setting when you are using Entra ID or External ID, or the oidc_authority setting when you are using External ID with its custom domain. Change the other one to null",
   "authority": "https://login.microsoftonline.com/6c1bada0-4944-497c-95c2-5bbaeaa88ccc",
   "tenant_id": "6c1bada0-4944-497c-95c2-5bbaeaa88ccc",
   "client_id":"3122bdef-d615-4d3d-a59c-0d0edcc2a0a7",
