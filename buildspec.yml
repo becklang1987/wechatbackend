@@ -18,3 +18,6 @@ phases:
     commands:
       - echo Pushing wechat_backend:v1.0 to Docker Hub
       - docker push becklang1987/wechat_backend:v1.1
+artifacts:
+  files: 
+    - '**/*'

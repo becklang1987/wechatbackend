@@ -1,8 +1,8 @@
-FROM ubuntu:latest
+FROM arm64v8/ubuntu:latest
 
 RUN mkdir /app
 COPY . /app
-RUN apt-get update && apt-get install -y python3 python3-pip vim curl iputils-ping
+RUN apt-get update && apt-get install -y python3 python3-pip vim curl iputils-ping  python-dev
 RUN apt-get update
 RUN apt install -y python3-flask python3-requests  python3-msal python3-gunicorn
 WORKDIR /app

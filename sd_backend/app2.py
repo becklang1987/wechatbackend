@@ -1,5 +1,6 @@
 from flask import Flask,request, session,jsonify,render_template_string
 from password_generator import generate_random_password
+from threading import Lock
 import msal ,requests,os
 import uuid, app_config as app_config 
 import json 
@@ -16,8 +17,29 @@ msal_app = msal.ConfidentialClientApplication(
 result = None
 app = Flask(__name__)
 app.secret_key = 'your_session_secret_key'
+file_path='./data.json'
 # 配置 Azure AD 应用程序详情
 
+file_lock = Lock()
+def write_session_data(sid,token):
+    with file_lock:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            data.append({"id":sid,"token":token})
+            f.close()
+        with open(file_path, 'w') as f:
+            json.dump(data, f)
+            f.close()
+def read_session_data(sid):
+    with file_lock:
+        with open(file_path, 'r') as f:
+            session_list = json.load(f)
+            for i in session_list:
+                if i.get('id') == sid:
+                    token=i.get('token')
+                    break
+            f.close()
+    return token
 # 初始化 MSAL 应用程序
 current_session_id=None
 current_session_username=None
@@ -48,7 +70,7 @@ def login():
 
 @app.route('/callback')
 def callback():
-    global result,sid,token
+    global result
     code = request.args.get('code')
     print("received code")
     if code:
@@ -61,6 +83,7 @@ def callback():
             print("tk is:",token)
             login_username= msal_app.get_accounts()[0]['username'] 
             sid=str(uuid.uuid4())
+            write_session_data(sid,token)
             print(login_username)# 用户信息'
             #return jsonify ({'message': 'Authentication successful'}), 200
             html_content ="""
@@ -96,6 +119,7 @@ def get_cookie():
     data=request.get_json()
     if data.get('sid'):
         session['sid']=data.get('sid')
+        token=read_session_data(session['sid'])
         session['token']=token
         print("token is:",token)
         return jsonify({'message': 'Cookie set successfully'}), 200
@@ -165,7 +189,6 @@ def get_user():
                     manager_info_url = f"https://graph.microsoft.com/v1.0/users/{id}/manager?$select=displayName"
                     manager_info_response = requests.get(manager_info_url, headers=headers)
                     manager_info=manager_info_response.json().get('displayName')
-                    session['token']=token
                     print("User  before info:", user_info)
                     m_dict={'manager':manager_info}
                     user_info[0].update(m_dict)
@@ -197,7 +220,6 @@ def get_user_details():
             if group_info_response.status_code == 200 :
                 group_info=group_info_response.json().get('value')
                 print("Group info:", group_info)
-                session['token']=token
                 #print("User info:", user_info)
                 #print("Property list:", property_list)
                 #print("Values list:", values_list)
@@ -221,7 +243,6 @@ def search_group():
             if group_info_response.status_code == 200 :
                 group_info=group_info_response.json().get('value')
                 print("Group info:", group_info)
-                session['token']=token
                 return jsonify({'group_list': group_info}), 200
             else:
                 return jsonify({'message': 'Failed to search group'}), 401
@@ -246,7 +267,6 @@ def list_group_members():
                     else:
                         i['MemberType']="User"
                 print("Group member info:", group_member_info)
-                session['token']=token
                 return jsonify({'group_member_list': group_member_info}), 200
             else:
                 return jsonify({'message': 'Failed to search group'}), 401
