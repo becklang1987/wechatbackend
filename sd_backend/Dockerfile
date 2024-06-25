@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:latest
+FROM python:3.9s
 
 RUN mkdir /app
 COPY . /app
