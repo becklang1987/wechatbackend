@@ -1,4 +1,4 @@
-FROM python:3.9s
+FROM python:3.9
 
 RUN mkdir /app
 COPY . /app
