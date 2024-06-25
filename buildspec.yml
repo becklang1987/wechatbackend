@@ -20,4 +20,4 @@ phases:
       - docker push becklang1987/wechat_backend:v1.1
 artifacts:
   files: 
-    - '**/*'
+    - 'sd_backend/**/*'
